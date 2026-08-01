@@ -19,11 +19,18 @@ in the same shape as the rest of the org.
 
 ## Follow-up
 
-Two things still need a hand, neither doable through the session proxy (writes to
-the repository-settings API are blocked there):
+1. **Set the default branch to `main`** — Settings → Branches.
 
-1. Set the default branch to `main` — Settings → Branches, or declare
-   `default_branch = "main"` in `infra/github-admin/repositories.tf` and apply
-   through `repo-admin-apply.yml`.
-2. Delete the stale `claude/adopt-org-harness` branch once `main` is default.
+   There is no org-wide way to do this. Rulesets *target* `~DEFAULT_BRANCH`; no
+   rule type *assigns* it, so `default-branch-protection` cannot help — it is in
+   fact currently protecting `claude/adopt-org-harness`, because it follows the
+   pointer. The org-level "repository default branch name" setting applies only
+   to newly created repositories.
+
+   The declarative alternative is a `github_branch_default` resource under
+   `infra/github-admin/` — note `github_repository.default_branch` is deprecated
+   in the `integrations/github ~> 6` provider, and this repository would have to
+   be imported first: only `infra` is declared there today.
+
+2. **Delete the stale `claude/adopt-org-harness` branch** once `main` is default.
    GitHub refuses to delete a repository's default branch, so step 1 comes first.
